@@ -2,10 +2,11 @@
 
 Given(/the following movies exist/) do |movies_table|
   movies_table.hashes.each do |movie|
+    movie[:release_date] = Date.parse(movie[:release_date])
+    Movie.create!(movie)
     # each returned element will be a hash whose key is the table header.
     # you should arrange to add that movie to the database here.
   end
-  pending "Fill in this step in movie_steps.rb"
 end
 
 Then(/(.*) seed movies should exist/) do |n_seeds|
@@ -18,7 +19,12 @@ end
 Then(/I should see "(.*)" before "(.*)"/) do |_e1, _e2|
   #  ensure that that e1 occurs before e2.
   #  page.body is the entire content of the page as a string.
-  pending "Fill in this step in movie_steps.rb"
+  entire_page = page.body
+  e1_index = entire_page.index(_e1.to_s)
+  e2_index = entire_page.index(_e2.to_s)
+  expect(e1_index).to_not be_nil
+  expect(e2_index).to_not be_nil
+  expect(e1_index).to be < e2_index
 end
 
 # Make it easier to express checking or unchecking several boxes at once
@@ -26,21 +32,35 @@ end
 #  "When I check the following ratings: G"
 
 When(/I (un)?check the following ratings: (.*)/) do |_uncheck, _rating_list|
+  split_list = _rating_list.split(', ')
+  split_list.each do |rating|
+    if _uncheck.nil?
+      step "I check the \"#{rating}\" checkbox"
+    else
+      step "I uncheck the \"#{rating}\" checkbox"
+    end
+  end
   # HINT: use String#split to split up the rating_list, then
   #   iterate over the ratings and reuse the "When I check..." or
   #   "When I uncheck..." steps in lines 89-95 of web_steps.rb
-  pending "Fill in this step in movie_steps.rb"
 end
 
 # Part 2, Step 3
 Then(/^I should (not )?see the following movies: (.*)$/) do |_no, _movie_list|
+  split_list = _movie_list.split(', ')
+  split_list.each do |movie|
+    if _no.nil?
+      step "I should see \"#{movie}\""
+    else
+      step "I should not see \"#{movie}\""
+    end
+  end
   # Take a look at web_steps.rb Then /^(?:|I )should see "([^"]*)"$/
-  pending "Fill in this step in movie_steps.rb"
 end
 
 Then(/I should see all the movies/) do
-  # Make sure that all the movies in the app are visible in the table
-  pending "Fill in this step in movie_steps.rb"
+  capybara_see = page.all('table#movies tbody tr').count
+  expect(Movie.count).to eq capybara_see
 end
 
 ### Utility Steps Just for this assignment.
